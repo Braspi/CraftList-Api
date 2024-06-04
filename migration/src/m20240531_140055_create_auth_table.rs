@@ -20,7 +20,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Auth::Image).string().not_null())
+                    .col(ColumnDef::new(Auth::Token).string().not_null())
                     .col(ColumnDef::new(Auth::UserId).integer().not_null())
                     .col(
                         ColumnDef::new(Auth::CreatedAt)
@@ -50,7 +50,7 @@ impl MigrationTrait for Migration {
 enum Auth {
     Table,
     Id,
-    Image,
+    Token,
     UserId,
     CreatedAt,
     ExpiresAt,
