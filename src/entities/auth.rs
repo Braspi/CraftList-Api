@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    pub image: String,
+    pub token: String,
     pub user_id: i32,
     pub created_at: Option<DateTime>,
     pub expires_at: DateTime,

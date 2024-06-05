@@ -4,5 +4,6 @@
   "threads": 4,
   "database_table": "database",
   "database_url": "mysql://user:password@localhost:3306",
-  "log": 2
+  "log": 2,
+  "json_token": "yourowntoken"
 }

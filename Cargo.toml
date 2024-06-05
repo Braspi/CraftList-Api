@@ -4,9 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+migration = { path = "./migration" }
+
 actix-cors = "0.7.0"
 actix-web = "4.6.0"
-actix-web-lab = "0.20.2"
+actix-web-lab = "0.19.2"
 env_logger = "0.11.3"
 log = "0.4.21"
 parking_lot = "0.12.3"
@@ -15,5 +17,7 @@ serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
 thiserror = "1.0.61"
 utoipa = "4.2.3"
-
-migration = { path = "./migration" }
+futures = { version = "0.3.30", default-features = false }
+argon2 = "0.5.3"
+chrono = { version = "0.4.38", features = ["serde"] }
+jsonwebtoken = "9.3.0"

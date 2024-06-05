@@ -14,14 +14,16 @@ use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
+use actix_web_lab::middleware::from_fn;
 use error::AppError;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database};
 use sender::Broadcaster;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tasks::spawn;
+use utils::auth_middleware;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct Config {
     addr: String,
     port: u16,
@@ -29,6 +31,7 @@ struct Config {
     database_table: String,
     database_url: String,
     log: u32,
+    json_token: String,
 }
 
 fn load_config() -> Config {
@@ -53,9 +56,10 @@ async fn main() -> Result<(), AppError> {
     let broadcaster = Broadcaster::create();
 
     // Spawn Tasks
-    // let broadcaster_clone = Arc::clone(&broadcaster);
-    // spawn(broadcaster_clone, Arc::clone(&conn));
+    let broadcaster_clone = Arc::clone(&broadcaster);
+    spawn(broadcaster_clone, Arc::clone(&conn));
 
+    let config_clone = config.clone();
     HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
@@ -65,9 +69,16 @@ async fn main() -> Result<(), AppError> {
         App::new()
             .wrap(cors)
             .app_data(Data::new(Arc::clone(&conn)))
+            .app_data(Data::new(config_clone.clone()))
             .app_data(Data::new(Arc::clone(&broadcaster)))
             .wrap(middleware::Logger::default().log_target("CraftList"))
             .configure(controllers::configure())
+            .route(
+                "/protec",
+                web::get()
+                    .wrap(from_fn(auth_middleware))
+                    .to(protected_route),
+            )
             .route("/events", web::get().to(sse_client))
             .route("/send", web::get().to(send))
     })
@@ -86,4 +97,15 @@ pub async fn sse_client(broadcaster: web::Data<Arc<Broadcaster>>) -> impl Respon
 pub async fn send(broadcaster: web::Data<Arc<Broadcaster>>) -> impl Responder {
     broadcaster.broadcast("Hello").await;
     HttpResponse::Ok().finish()
+}
+
+#[derive(Serialize)]
+struct ProtectedResponse {
+    message: String,
+}
+
+async fn protected_route() -> Result<HttpResponse, AppError> {
+    Ok(HttpResponse::Ok().json(ProtectedResponse {
+        message: "This is a protected route".to_string(),
+    }))
 }
