@@ -9,8 +9,13 @@ use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, 
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::sync::Arc;
 
-use crate::{entities::auth, error::AppError, Config};
+use crate::{
+    entities::{auth, sea_orm_active_enums::Role, users},
+    error::AppError,
+    Config,
+};
 
 pub fn validate<T>(body: Value) -> Result<T, AppError>
 where
@@ -148,4 +153,41 @@ pub async fn auth_middleware(
         Ok(_) => next.call(req).await,
         Err(_) => Err(actix_web::error::ErrorUnauthorized("")),
     }
+}
+
+pub async fn admin_auth_middleware(
+    db: web::Data<Arc<DatabaseConnection>>,
+    config: web::Data<Config>,
+    req: ServiceRequest,
+    next: Next<impl MessageBody>,
+) -> Result<ServiceResponse<impl MessageBody>, actix_web::Error> {
+    let token = req
+        .headers()
+        .get("Authentication")
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
+
+    let Some(token_v) = token else {
+        return Err(actix_web::error::ErrorUnauthorized("Missing jwt token").into());
+    };
+
+    let Ok(claims) = validate_token(&token_v, config.json_token.as_bytes()).await else {
+        return Err(actix_web::error::ErrorUnauthorized("Invalid token").into());
+    };
+
+    let user = users::Entity::find()
+        .filter(users::Column::Id.eq(claims.sub))
+        .filter(users::Column::Role.eq(Role::Admin))
+        .one(db.get_ref().as_ref())
+        .await
+        .unwrap();
+
+    if user.is_some() {
+        return next.call(req).await;
+    }
+
+    return Err(actix_web::error::ErrorUnauthorized(
+        "You are not authorized to access this resource",
+    )
+    .into());
 }

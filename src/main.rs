@@ -24,7 +24,7 @@ use sea_orm::{ConnectOptions, Database};
 use sender::Broadcaster;
 use serde::{Deserialize, Serialize};
 use tasks::spawn;
-use utils::auth_middleware;
+use utils::{admin_auth_middleware, auth_middleware};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -82,7 +82,7 @@ async fn main() -> Result<(), AppError> {
             .configure(controllers::configure())
             .service(
                 web::resource("/protec")
-                    .wrap(from_fn(auth_middleware))
+                    .wrap(from_fn(admin_auth_middleware))
                     .route(web::get().to(protected_route)),
             )
             .route("/events", web::get().to(sse_client))
