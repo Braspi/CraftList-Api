@@ -10,19 +10,31 @@ use crate::{entities::users, error::AppError};
 
 use super::RegisterRequest;
 
+// TODO: Validate if user already exists
+#[utoipa::path(
+    post,
+    path = "/auth/register",
+    tag = "Auth",
+    request_body(content = RegisterRequest, description = "Credentials data", content_type = "application/json"),
+    responses(
+        (status = 200, description = "Successfully registered"),
+        (status = 401, description = "Invalid refresh_token provided"),
+        (status = 500, description = "Database error"),
+    )
+)]
 pub async fn register(
     db: web::Data<Arc<DatabaseConnection>>,
-    req: web::Json<RegisterRequest>,
+    data: web::Json<RegisterRequest>,
 ) -> Result<impl Responder, AppError> {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
     let password_hash = argon2
-        .hash_password(req.password.as_bytes(), &salt)
+        .hash_password(data.password.as_bytes(), &salt)
         .unwrap();
 
     let new_user = users::ActiveModel {
-        email: Set(req.email.clone()),
-        username: Set(req.username.clone()),
+        email: Set(data.email.clone()),
+        username: Set(data.username.clone()),
         password: Set(password_hash.to_string()),
         ..Default::default()
     };
