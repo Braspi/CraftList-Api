@@ -11,6 +11,7 @@ mod m20240531_140238_create_ads_table;
 mod m20240531_140243_create_players_graph_table;
 mod m20240531_140339_create_reviews_table;
 mod m20240604_185157_make_email_unique;
+mod m20240607_123717_add_user_role;
 
 pub struct Migrator;
 
@@ -29,6 +30,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20240531_140243_create_players_graph_table::Migration),
             Box::new(m20240531_140339_create_reviews_table::Migration),
             Box::new(m20240604_185157_make_email_unique::Migration),
+            Box::new(m20240607_123717_add_user_role::Migration),
         ]
     }
 }

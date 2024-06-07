@@ -7,6 +7,7 @@ pub mod auth;
 pub mod categories;
 pub mod players_graph;
 pub mod reviews;
+pub mod sea_orm_active_enums;
 pub mod server_categories;
 pub mod servers;
 pub mod servers_info;
