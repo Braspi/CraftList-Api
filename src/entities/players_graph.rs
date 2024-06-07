@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
     Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, utoipa :: ToSchema,
 )]
 #[sea_orm(table_name = "players_graph")]
-#[schema(title = "changeThis")]
-# [schema (as = crate :: entities :: changeThis :: Model)]
+#[schema(title = "PlayersGraph")]
+#[schema(as = crate::entities::players_graph::Model)]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,

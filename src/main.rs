@@ -1,5 +1,6 @@
 mod client_update;
 mod controllers;
+mod docs;
 mod entities;
 mod error;
 mod sender;
@@ -10,11 +11,13 @@ use std::{fs::File, io::Read, sync::Arc};
 
 use actix_cors::Cors;
 use actix_web::{
+    http::header,
     middleware,
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
 use actix_web_lab::middleware::from_fn;
+use docs::ApiDoc;
 use error::AppError;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database};
@@ -22,6 +25,8 @@ use sender::Broadcaster;
 use serde::{Deserialize, Serialize};
 use tasks::spawn;
 use utils::auth_middleware;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Deserialize, Clone)]
 struct Config {
@@ -59,6 +64,8 @@ async fn main() -> Result<(), AppError> {
     let broadcaster_clone = Arc::clone(&broadcaster);
     spawn(broadcaster_clone, Arc::clone(&conn));
 
+    let openapi = ApiDoc::openapi();
+
     let config_clone = config.clone();
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -73,14 +80,22 @@ async fn main() -> Result<(), AppError> {
             .app_data(Data::new(Arc::clone(&broadcaster)))
             .wrap(middleware::Logger::default().log_target("CraftList"))
             .configure(controllers::configure())
-            .route(
-                "/protec",
-                web::get()
+            .service(
+                web::resource("/protec")
                     .wrap(from_fn(auth_middleware))
-                    .to(protected_route),
+                    .route(web::get().to(protected_route)),
             )
             .route("/events", web::get().to(sse_client))
             .route("/send", web::get().to(send))
+            .route(
+                "/docs",
+                web::get().to(|| async {
+                    HttpResponse::Found()
+                        .insert_header((header::LOCATION, "/docs/"))
+                        .finish()
+                }),
+            )
+            .service(SwaggerUi::new("/docs/{_:.*}").url("/api-doc/openapi.json", openapi.clone()))
     })
     .workers(config.threads)
     .bind((config.addr, config.port))?
