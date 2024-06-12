@@ -11,6 +11,9 @@ use super::DeleteCategory;
     delete,
     path = "/api/categories",
     tag = "Categories",
+    params(
+        ("Authentication" = String, Header, description = "JWT access token"),
+    ),
     request_body(content = DeleteCategory, description = "Category Data", content_type = "application/json", examples(
         ("Full" = (value = json!({"id": 3, "name": "Vanilla"}))),
         ("No Id" = (value = json!({"name": "Vanilla"})))

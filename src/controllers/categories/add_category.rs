@@ -11,6 +11,9 @@ use super::Category;
     post,
     path = "/api/categories",
     tag = "Categories",
+    params(
+        ("Authentication" = String, Header, description = "JWT access token"),
+    ),
     request_body(content = Category, description = "Category Data", content_type = "application/json", example = json!({"name": "Vanilla"})),
     responses(
         (status = 201, description = "Created new category", body = None, example = json!({"message": "Success", "id": 3})),

@@ -11,6 +11,9 @@ use super::UpdateCategory;
     put,
     path = "/api/categories",
     tag = "Categories",
+    params(
+        ("Authentication" = String, Header, description = "JWT access token"),
+    ),
     request_body(content = UpdateCategory, description = "Category Data", content_type = "application/json", example = json!({"id": 3, "name": "Vanilla"})),
     responses(
         (status = 200, description = "Successfully updated category", body = None, example = json!({"message": "Success"})),
