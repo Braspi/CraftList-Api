@@ -1,6 +1,7 @@
 use actix_web::{
     body::MessageBody,
     dev::{ServiceRequest, ServiceResponse},
+    error::ErrorUnauthorized,
     web,
 };
 use actix_web_lab::middleware::Next;
@@ -146,12 +147,12 @@ pub async fn auth_middleware(
         .map(str::to_owned);
 
     let Some(token_v) = token else {
-        return Err(actix_web::error::ErrorUnauthorized(""));
+        return Err(ErrorUnauthorized("Missing jwt token"));
     };
 
     match validate_token(&token_v, config.json_token.as_bytes()).await {
         Ok(_) => next.call(req).await,
-        Err(_) => Err(actix_web::error::ErrorUnauthorized("")),
+        Err(_) => Err(ErrorUnauthorized("Invalid token")),
     }
 }
 
@@ -168,11 +169,11 @@ pub async fn admin_auth_middleware(
         .map(str::to_owned);
 
     let Some(token_v) = token else {
-        return Err(actix_web::error::ErrorUnauthorized("Missing jwt token").into());
+        return Err(ErrorUnauthorized("Missing jwt token").into());
     };
 
     let Ok(claims) = validate_token(&token_v, config.json_token.as_bytes()).await else {
-        return Err(actix_web::error::ErrorUnauthorized("Invalid token").into());
+        return Err(ErrorUnauthorized("Invalid token").into());
     };
 
     let user = users::Entity::find()
@@ -186,8 +187,5 @@ pub async fn admin_auth_middleware(
         return next.call(req).await;
     }
 
-    return Err(actix_web::error::ErrorUnauthorized(
-        "You are not authorized to access this resource",
-    )
-    .into());
+    return Err(ErrorUnauthorized("You are not authorized to access this resource").into());
 }
