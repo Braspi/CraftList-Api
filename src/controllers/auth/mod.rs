@@ -27,8 +27,8 @@ pub struct LoginResponse {
 pub fn configure() -> impl FnOnce(&mut ServiceConfig) {
     |config: &mut ServiceConfig| {
         config
-            .service(web::resource("/register").route(web::post().to(register::register)))
-            .service(web::resource("/login").route(web::post().to(login::login)))
-            .service(web::resource("/refresh").route(web::get().to(refresh::refresh)));
+            .service(web::resource("/register").post(register::register))
+            .service(web::resource("/login").post(login::login))
+            .service(web::resource("/refresh").get(refresh::refresh));
     }
 }
