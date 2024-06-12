@@ -14,6 +14,12 @@ use utoipa::{Modify, OpenApi};
         crate::controllers::categories::list_categories::list_categories,
         crate::controllers::categories::update_category::update_category,
         crate::controllers::categories::remove_category::remove_category,
+
+        // Versions
+        crate::controllers::versions::add_version::add_version,
+        crate::controllers::versions::list_versions::list_versions,
+        crate::controllers::versions::update_version::update_version,
+        crate::controllers::versions::remove_version::remove_version,
     ),
     components(
         // Auth
@@ -28,6 +34,13 @@ use utoipa::{Modify, OpenApi};
             crate::controllers::categories::Category,
             crate::controllers::categories::UpdateCategory,
             crate::controllers::categories::DeleteCategory,
+        ),
+
+        // Versions
+        schemas(
+            crate::controllers::versions::Version,
+            crate::controllers::versions::UpdateVersion,
+            crate::controllers::versions::DeleteVersion,
         ),
 
         // Entities
