@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{error::ErrorNotFound, web, HttpResponse, Responder};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 use serde_json::json;
 use std::sync::Arc;
@@ -44,5 +44,5 @@ pub async fn remove_version(
         return Ok(HttpResponse::Ok().json(json!({"message": "Success"})));
     }
 
-    Ok(HttpResponse::NotFound().json(json!({"message": "No such version exist"})))
+    Err(ErrorNotFound("No such version exist").into())
 }

@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{error::ErrorConflict, web, HttpResponse, Responder};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, EntityTrait};
 use serde_json::json;
 use std::sync::Arc;
@@ -36,7 +36,7 @@ pub async fn add_category(
         .collect();
 
     if categories.contains(&data.name.to_lowercase()) {
-        return Ok(HttpResponse::Conflict().json(json!({"message": "Category already exists"})));
+        return Err(ErrorConflict("Category already exists").into());
     }
 
     let model = categories::ActiveModel {

@@ -1,4 +1,6 @@
-use actix_web::{cookie::Cookie, web, Error, HttpRequest, HttpResponse, Responder};
+use actix_web::{
+    cookie::Cookie, error::ErrorUnauthorized, web, Error, HttpRequest, HttpResponse, Responder,
+};
 use argon2::{self, Argon2, PasswordHash, PasswordVerifier};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde_json::json;
@@ -16,9 +18,6 @@ use super::{LoginRequest, LoginResponse};
     post,
     path = "/auth/login",
     tag = "Auth",
-    // params(
-    //     ("Authentication" = String, Header, description = "Jwt access token"),
-    // ),
     request_body(content = LoginRequest, description = "Credentials data", content_type = "application/json"),
     responses(
         (status = 200, description = "Successfully logged in", body = LoginResponse),
@@ -67,6 +66,7 @@ pub async fn login(
                     create_refresh_token(db.get_ref(), user.id, config.json_token.as_bytes()).await;
             }
             let cookie = Cookie::build("refresh_token", refresh_token)
+                // TODO: Add valid domain url to unwrap
                 .domain(req.uri().host().unwrap_or(""))
                 .path("/")
                 .http_only(true)
@@ -78,5 +78,5 @@ pub async fn login(
         }
     }
 
-    Ok(HttpResponse::Unauthorized().json(json!({"message": "Invalid Credentials"})))
+    Err(ErrorUnauthorized("Invalid Credentials").into())
 }
