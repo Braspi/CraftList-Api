@@ -8,12 +8,26 @@ use utoipa::{Modify, OpenApi};
         crate::controllers::auth::login::login,
         crate::controllers::auth::register::register,
         crate::controllers::auth::refresh::refresh,
+
+        // Categories
+        crate::controllers::categories::add_category::add_category,
+        crate::controllers::categories::list_categories::list_categories,
+        crate::controllers::categories::update_category::update_category,
+        crate::controllers::categories::remove_category::remove_category,
     ),
     components(
+        // Auth
         schemas(
             crate::controllers::auth::LoginRequest,
             crate::controllers::auth::LoginResponse,
             crate::controllers::auth::RegisterRequest,
+        ),
+
+        // Categories
+        schemas(
+            crate::controllers::categories::Category,
+            crate::controllers::categories::UpdateCategory,
+            crate::controllers::categories::DeleteCategory,
         ),
 
         // Entities
@@ -28,6 +42,8 @@ use utoipa::{Modify, OpenApi};
             crate::entities::servers_info::Model,
             crate::entities::users::Model,
             crate::entities::versions::Model,
+
+            crate::entities::sea_orm_active_enums::Role,
         ),
 
         // Errors
