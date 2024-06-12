@@ -68,7 +68,7 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-enum ServersInfo {
+pub enum ServersInfo {
     Table,
     Id,
     ServerId,

@@ -1,8 +1,8 @@
 use sea_orm_migration::prelude::*;
 
 use crate::{
-    m20240531_140153_create_servers_table::Servers,
     m20240531_140207_create_categories_table::Categories,
+    m20240531_140213_create_servers_info_table::ServersInfo,
 };
 
 #[derive(DeriveMigrationName)]
@@ -30,7 +30,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("FK_ServerCategories_Servers")
                             .from(ServerCategories::Table, ServerCategories::ServerId)
-                            .to(Servers::Table, Servers::Id),
+                            .to(ServersInfo::Table, ServersInfo::Id),
                     )
                     .foreign_key(
                         ForeignKey::create()

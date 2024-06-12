@@ -1,6 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use crate::m20240531_140153_create_servers_table::Servers;
+use crate::m20240531_140213_create_servers_info_table::ServersInfo;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -35,7 +35,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("FK_PlayersGraph_Servers")
                             .from(PlayersGraph::Table, PlayersGraph::ServerId)
-                            .to(Servers::Table, Servers::Id),
+                            .to(ServersInfo::Table, ServersInfo::Id),
                     )
                     .to_owned(),
             )
