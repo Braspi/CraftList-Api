@@ -1,0 +1,9 @@
+[package]
+name = "craftping"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+elytra-ping = "5.0.0"
+trust-dns-resolver = "0.23.2"
+thiserror = "1.0.61"

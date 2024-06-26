@@ -1,3 +1,5 @@
+workspace = { members = ["craftping"] }
+
 [package]
 name = "craftlist-api"
 version = "0.1.0"
@@ -5,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 migration = { path = "./migration" }
+craftping = { path = "./craftping" }
 
 actix-cors = "0.7.0"
 actix-web = "4.6.0"
