@@ -20,6 +20,12 @@ use utoipa::{Modify, OpenApi};
         crate::controllers::versions::list_versions::list_versions,
         crate::controllers::versions::update_version::update_version,
         crate::controllers::versions::remove_version::remove_version,
+
+        // Servers
+        crate::controllers::servers::list_servers::list_servers,
+        crate::controllers::servers::get_server::get_server,
+        crate::controllers::servers::get_user_servers::get_user_servers,
+        crate::controllers::servers::add_server::add_server,
     ),
     components(
         // Auth
@@ -41,6 +47,13 @@ use utoipa::{Modify, OpenApi};
             crate::controllers::versions::Version,
             crate::controllers::versions::UpdateVersion,
             crate::controllers::versions::DeleteVersion,
+        ),
+
+        // Servers
+        schemas(
+            crate::controllers::servers::Server,
+            crate::controllers::servers::Category,
+            crate::controllers::servers::ServerData,
         ),
 
         // Entities
