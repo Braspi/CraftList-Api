@@ -2,6 +2,7 @@ use actix_web::{
     error::{ErrorBadRequest, ErrorConflict},
     web, HttpRequest, HttpResponse, Responder,
 };
+use craftping::ping;
 use migration::{Alias, Expr, SimpleExpr};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, DbErr, EntityTrait,
@@ -90,7 +91,7 @@ pub async fn add_server(
         .into_tuple()
         .one(db.get_ref().as_ref())
         .await?
-        .ok_or(AppError::DbError(DbErr::RecordNotFound(
+        .ok_or(AppError::Db(DbErr::RecordNotFound(
             "Could not find version data".to_owned(),
         )))?;
 
@@ -143,6 +144,9 @@ pub async fn add_server(
     server_categories::Entity::insert_many(new_categories)
         .exec(db.get_ref().as_ref())
         .await?;
+
+    // let ping = ping(data.address.clone(), data.port).await;
+    // ping.
 
     Ok(HttpResponse::Created().json(json!({"message": "Success"})))
 }

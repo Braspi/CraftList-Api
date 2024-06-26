@@ -27,7 +27,7 @@ where
     let req: T = match data {
         Ok(v) => v,
         Err(e) => {
-            return Err(AppError::SerdeError(e));
+            return Err(AppError::Serde(e));
         }
     };
     Ok(req)

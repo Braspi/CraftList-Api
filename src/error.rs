@@ -7,29 +7,27 @@ use utoipa::ToSchema;
 #[derive(Debug, Error, ToSchema)]
 pub enum AppError {
     #[error("Database Error: {0}")]
-    DbError(#[from] sea_orm::DbErr),
+    Db(#[from] sea_orm::DbErr),
 
     #[error("Io Error: {0}")]
-    IoError(#[from] std::io::Error),
+    Io(#[from] std::io::Error),
 
     #[error("Error while serializing or deserializing JSON: {0}")]
-    SerdeError(#[from] serde_json::Error),
+    Serde(#[from] serde_json::Error),
 
     #[error("{0}")]
-    ActixError(#[from] actix_web::error::Error),
+    Actix(#[from] actix_web::error::Error),
 
     #[error("{0}")]
-    JsonWebTokenError(#[from] jsonwebtoken::errors::Error),
+    JsonWebToken(#[from] jsonwebtoken::errors::Error),
 }
 
 impl AppError {
     pub fn status_code(&self) -> StatusCode {
         match self {
-            Self::DbError(_) | Self::IoError(_) | Self::JsonWebTokenError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
-            Self::ActixError(e) => e.as_response_error().status_code(),
-            Self::SerdeError(_) => StatusCode::BAD_REQUEST,
+            Self::Db(_) | Self::Io(_) | Self::JsonWebToken(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Actix(e) => e.as_response_error().status_code(),
+            Self::Serde(_) => StatusCode::BAD_REQUEST,
         }
     }
 }
@@ -46,11 +44,9 @@ impl actix_web::error::ResponseError for AppError {
 
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::DbError(_) | Self::IoError(_) | Self::JsonWebTokenError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
-            Self::ActixError(e) => e.as_response_error().status_code(),
-            Self::SerdeError(_) => StatusCode::BAD_REQUEST,
+            Self::Db(_) | Self::Io(_) | Self::JsonWebToken(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Actix(e) => e.as_response_error().status_code(),
+            Self::Serde(_) => StatusCode::BAD_REQUEST,
         }
     }
 }
