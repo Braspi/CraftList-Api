@@ -161,7 +161,7 @@ pub async fn admin_auth_middleware(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, actix_web::Error> {
-    let Ok(claims) = validate_token(&req.get_token()?, config.json_token.as_bytes()).await else {
+    let Ok(claims) = validate_token(req.get_token()?, config.json_token.as_bytes()).await else {
         return Err(ErrorUnauthorized("Invalid token"));
     };
 
