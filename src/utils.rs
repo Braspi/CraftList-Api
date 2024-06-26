@@ -44,14 +44,12 @@ fn create_token(user_id: i32, expiration: NaiveDateTime, secret_key: &[u8]) -> S
         exp: expiration.and_utc().timestamp(),
     };
 
-    let token = encode(
+    encode(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(secret_key),
     )
-    .expect("token creation failed");
-
-    token
+    .expect("token creation failed")
 }
 
 pub fn create_access_token(user_id: i32, secret_key: &[u8]) -> String {
@@ -147,7 +145,7 @@ pub async fn auth_middleware(
         .map(str::to_owned);
 
     let Some(token_v) = token else {
-        return Err(ErrorUnauthorized("Missing jwt token"));
+        return Err(ErrorUnauthorized("Missing JWT token"));
     };
 
     match validate_token(&token_v, config.json_token.as_bytes()).await {
@@ -169,11 +167,11 @@ pub async fn admin_auth_middleware(
         .map(str::to_owned);
 
     let Some(token_v) = token else {
-        return Err(ErrorUnauthorized("Missing jwt token").into());
+        return Err(ErrorUnauthorized("Missing JWT token"));
     };
 
     let Ok(claims) = validate_token(&token_v, config.json_token.as_bytes()).await else {
-        return Err(ErrorUnauthorized("Invalid token").into());
+        return Err(ErrorUnauthorized("Invalid token"));
     };
 
     let user = users::Entity::find()
@@ -187,5 +185,7 @@ pub async fn admin_auth_middleware(
         return next.call(req).await;
     }
 
-    return Err(ErrorUnauthorized("You are not authorized to access this resource").into());
+    Err(ErrorUnauthorized(
+        "You are not authorized to access this resource",
+    ))
 }

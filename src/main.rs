@@ -16,15 +16,13 @@ use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
-use actix_web_lab::middleware::from_fn;
 use docs::ApiDoc;
 use error::AppError;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database};
 use sender::Broadcaster;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tasks::spawn;
-use utils::{admin_auth_middleware, auth_middleware};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -80,11 +78,6 @@ async fn main() -> Result<(), AppError> {
             .app_data(Data::new(Arc::clone(&broadcaster)))
             .wrap(middleware::Logger::default().log_target("CraftList"))
             .configure(controllers::configure())
-            .service(
-                web::resource("/protec")
-                    .wrap(from_fn(admin_auth_middleware))
-                    .route(web::get().to(protected_route)),
-            )
             .route("/events", web::get().to(sse_client))
             .route("/send", web::get().to(send))
             .route(
@@ -112,15 +105,4 @@ pub async fn sse_client(broadcaster: web::Data<Arc<Broadcaster>>) -> impl Respon
 pub async fn send(broadcaster: web::Data<Arc<Broadcaster>>) -> impl Responder {
     broadcaster.broadcast("Hello").await;
     HttpResponse::Ok().finish()
-}
-
-#[derive(Serialize)]
-struct ProtectedResponse {
-    message: String,
-}
-
-async fn protected_route() -> Result<HttpResponse, AppError> {
-    Ok(HttpResponse::Ok().json(ProtectedResponse {
-        message: "This is a protected route".to_string(),
-    }))
 }

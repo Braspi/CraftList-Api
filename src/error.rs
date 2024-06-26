@@ -19,16 +19,17 @@ pub enum AppError {
     ActixError(#[from] actix_web::error::Error),
 
     #[error("{0}")]
-    NoneValue(&'static str),
+    JsonWebTokenError(#[from] jsonwebtoken::errors::Error),
 }
 
 impl AppError {
     pub fn status_code(&self) -> StatusCode {
         match self {
-            Self::DbError(_) | Self::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::DbError(_) | Self::IoError(_) | Self::JsonWebTokenError(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             Self::ActixError(e) => e.as_response_error().status_code(),
             Self::SerdeError(_) => StatusCode::BAD_REQUEST,
-            Self::NoneValue(_) => StatusCode::NOT_FOUND,
         }
     }
 }
@@ -45,10 +46,11 @@ impl actix_web::error::ResponseError for AppError {
 
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::DbError(_) | Self::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::DbError(_) | Self::IoError(_) | Self::JsonWebTokenError(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             Self::ActixError(e) => e.as_response_error().status_code(),
             Self::SerdeError(_) => StatusCode::BAD_REQUEST,
-            Self::NoneValue(_) => StatusCode::NOT_FOUND,
         }
     }
 }

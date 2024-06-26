@@ -155,7 +155,7 @@ async fn check_from_db<'a, T>(
 {
     let res = fetch_fn(conn)
         .await
-        .unwrap_or_else(|e| UpdateResponseBody::err(&e.into()));
+        .unwrap_or_else(|e| UpdateResponseBody::err(&e));
 
     if let Some(data) = res.data.clone() {
         let data = validate::<Vec<T>>(data).unwrap();
