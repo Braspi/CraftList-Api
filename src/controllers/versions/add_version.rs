@@ -10,7 +10,7 @@ use super::Version;
 #[utoipa::path(
     post,
     path = "/api/versions",
-    tag = "versions",
+    tag = "Versions",
     params(
         ("Authentication" = String, Header, description = "JWT access token"),
     ),

@@ -8,7 +8,7 @@ use crate::{entities::versions, error::AppError};
 #[utoipa::path(
     get,
     path = "/api/versions",
-    tag = "versions",
+    tag = "Versions",
     responses(
         (status = 200, description = "List of versions", body = Vec<crate::entities::versions::Model>, example = json!([{"id": 1, "name": "1.7", "protocol": 3}, {"id": 3, "name": "1.8", "protocol": 47}])),
         (status = 500, description = "Server error"),
