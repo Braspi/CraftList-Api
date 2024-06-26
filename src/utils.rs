@@ -1,8 +1,9 @@
 use actix_web::{
     body::MessageBody,
     dev::{ServiceRequest, ServiceResponse},
-    error::ErrorUnauthorized,
-    web,
+    error::{ErrorBadRequest, ErrorUnauthorized},
+    http::header,
+    web, HttpRequest,
 };
 use actix_web_lab::middleware::Next;
 use chrono::{Duration, NaiveDateTime, Utc};
@@ -160,17 +161,7 @@ pub async fn admin_auth_middleware(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, actix_web::Error> {
-    let token = req
-        .headers()
-        .get("Authentication")
-        .and_then(|value| value.to_str().ok())
-        .map(str::to_owned);
-
-    let Some(token_v) = token else {
-        return Err(ErrorUnauthorized("Missing JWT token"));
-    };
-
-    let Ok(claims) = validate_token(&token_v, config.json_token.as_bytes()).await else {
+    let Ok(claims) = validate_token(&req.get_token()?, config.json_token.as_bytes()).await else {
         return Err(ErrorUnauthorized("Invalid token"));
     };
 
@@ -189,3 +180,36 @@ pub async fn admin_auth_middleware(
         "You are not authorized to access this resource",
     ))
 }
+
+pub trait RequestUtils {
+    fn get_user_id(&self) -> Result<i32, AppError>;
+    fn get_token(&self) -> Result<&str, actix_web::Error>;
+}
+
+macro_rules! impl_request_utils {
+    ($type:ty) => {
+        impl RequestUtils for $type {
+            fn get_user_id(&self) -> Result<i32, AppError> {
+                let config = self.app_data::<Config>().unwrap();
+
+                let token_data = decode::<Claims>(
+                    self.get_token()?,
+                    &DecodingKey::from_secret(config.json_token.as_bytes()),
+                    &Validation::new(Algorithm::HS256),
+                )?;
+
+                Ok(token_data.claims.sub)
+            }
+
+            fn get_token(&self) -> Result<&str, actix_web::Error> {
+                self.headers()
+                    .get(header::AUTHORIZATION)
+                    .and_then(|value| value.to_str().ok())
+                    .ok_or(ErrorBadRequest("Missing JWT token"))
+            }
+        }
+    };
+}
+
+impl_request_utils!(HttpRequest);
+impl_request_utils!(ServiceRequest);
